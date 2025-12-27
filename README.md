@@ -88,3 +88,90 @@ This project was created to solve a **real workplace problem** at my job. Curren
 ### Start backend & database
 ```bash
 docker-compose up --build
+```
+
+
+API available at: `http://127.0.0.1:8000/api/`
+
+### Frontend
+```bash
+cd frontend
+pip install -r requirements.txt
+python GUI_Tkinker.py
+```
+
+## 🧪 Running Tests
+```bash
+# Run all tests inside web container
+docker-compose exec web pytest
+
+# Run tests with verbose output
+docker-compose exec web pytest -v
+
+```
+
+## 📊 Architecture
+```text
+┌─────────────────┐
+│ Tkinter Client │ (Desktop GUI)
+└────────┬────────┘
+         │ HTTP + Basic Auth
+         ▼
+┌─────────────────┐
+│ Django REST    │ (Docker: web)
+│ API            │ Views → Services → Models
+│                │ Atomic transactions, validation
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ PostgreSQL     │ (Docker: db)
+│                │ Component & Localization tables
+└─────────────────┘
+```
+
+## 📝 Example Request
+
+```bash
+curl -X POST http://localhost:8000/api/add_components/ \
+  -u user:password \
+  -H "Content-Type: application/json" \
+  -d '{"code":"1234","localization":"A1","quantity":10}'
+ ```
+# Response
+```bash
+{"message": "Adding code 1234 on localization A1 was successful"}
+```
+
+## 🔒 Key Implementation Details
+- **Transaction Safety:** select_for_update() prevents concurrent modification issues
+- **Service Layer:** Business logic separated from views (clean architecture)
+- **Custom Validators:** Code format, quantity limits, location capacity
+- **Permission Classes:** IsAuthenticated, IsAdminUser
+- **Atomic Operations:** Ensures data consistency
+
+## 📁 Project Structure
+```
+Warehouse/
+├── backend/
+│   ├── Dockerfile                 # Django backend container
+│   ├── docker-compose.yaml        # Docker Compose (web + PostgreSQL)
+│   ├── .env                       # Environment variables
+│   ├── requirements.txt           # Backend dependencies
+│   ├── manage.py
+│   └── Warehouse_System/           # Main app
+│       ├── models.py               # Component, Localization models
+│       ├── serializers.py          # DRF serializers
+│       ├── views.py                # API endpoints
+│       ├── services.py             # Business logic
+│       └── tests/                  # Pytest tests
+│
+└── frontend/
+    ├── GUI_Tkinker.py              # Desktop client
+    └── requirements.txt            # Frontend dependencies
+```
+
+## 👤 Author
+
+**Kacper Kubiak**
+- GitHub: [Guciowsky333](https://github.com/Guciowsky333/SGP_Inventory_System)
